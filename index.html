@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Quiz of MHC-HNSLI-2017</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f9f9f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .quiz-container {
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .quiz-container h1 {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #333;
+    }
+
+    .question {
+      font-size: 1.2em;
+      margin-bottom: 15px;
+      color: #444;
+    }
+
+    .options label {
+      display: block;
+      background: #f1f1f1;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .options label:hover {
+      background: #e2e2e2;
+    }
+
+    .options input[type="radio"] {
+      margin-right: 10px;
+    }
+
+    .result {
+      margin-top: 20px;
+      font-size: 1em;
+      color: #555;
+    }
+
+    .btn-container {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      background: #007bff;
+      color: #fff;
+      cursor: pointer;
+      font-size: 1em;
+      transition: all 0.3s;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    button:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+    }
+
+    .restart {
+      background: #28a745;
+    }
+
+    .restart:hover {
+      background: #218838;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 10px;
+    }
+
+    ul li {
+      margin-bottom: 10px;
+      background: #f8f9fa;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (max-width: 480px) {
+      .quiz-container {
+        padding: 15px;
+      }
+
+      .quiz-container h1 {
+        font-size: 1.2em;
+      }
+      .name{
+        float: right;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <h1>Quiz Applying 5s procedur</h1>
+    <p class="question" id="question"></p>
+    <div class="options" id="option"></div>
+    <div class="result" id="result"></div>
+    <div class="btn-container">
+      <button id="submit-btn" onclick="next()">Submit</button>
+      <button id="restart-btn" onclick="restart()" style="display: none;" class="restart">Restart</button>
+    </div>
+  <i class="name">by student Aklok Tilahun</i>
+  </div>
+
+  <script>
+    const questions = [
+      { 
+        question: "What is epistemology?",
+        option: ["A, Study of knowladge", "B, Study of human beings", "C, Study of reality"],
+        correct: 0
+      },
+      { 
+        question: "what is the study of Logic?",
+        option: ["A, axiology", "B, value", "C, reasoning"],
+        correct: 2
+      },
+       { 
+        question: "what is the study of Ethics?",
+        option: ["A, beautiy", "B, moral principle", "C, reasoning"],
+        correct: 1
+      },
+      { 
+        question: "how many devide set in order?",
+        option: ["A, by 4", "B, by 3", "C, by 2"],
+        correct: 2
+      } ,
+      { 
+        question: "what is the origin japan's word of (standadize)?",
+        option: ["A, seiri", "B, seiso", "C, seiketsu"],
+        correct: 2
+      },
+      { 
+        question: "moral come from 'mores' word form that word is greek ture or false?",
+        option: ["A,true", "B,false", "C, all"],
+        correct: 1
+      },
+      
+      { 
+        question: "what is the study of metaphycis?",
+        option: ["A, realtiy", "B, value", "C, knowladge"],
+        correct: 0
+      }
+    ];
+
+    let score = 0;
+    let currentQuestion = 0;
+    let userAnswers = [];
+
+    const outQuestion = document.querySelector('#question');
+    const outOption = document.querySelector('#option');
+    const outResult = document.querySelector('#result');
+    const submitBtn = document.querySelector('#submit-btn');
+    const restartBtn = document.querySelector('#restart-btn');
+
+    function display() {
+      if (currentQuestion >= questions.length) {
+        showFinalResult();
+        return;
+      }
+
+      // Display the current question
+      const questionData = questions[currentQuestion];
+      outQuestion.innerHTML = (currentQuestion + 1) + " ,"+ questionData.question;
+
+      // Display the options
+      const optionsHtml = questionData.option
+        .map((option, index) => 
+          `<label>
+            <input type="radio" name="answer" value="${index}">
+            ${option}
+          </label>`
+        )
+        .join('');
+      outOption.innerHTML = optionsHtml;
+
+      outResult.innerHTML = ""; // Clear previous result
+    }
+
+    function next() {
+      const selectedOption = document.querySelector('input[name="answer"]:checked');
+      if (!selectedOption) {
+        outResult.innerHTML = "<span style='color: red;'>Please select an answer!</span>";
+        return;
+      }
+
+      const answer = parseInt(selectedOption.value);
+      userAnswers.push({ 
+        question: questions[currentQuestion].question,
+        selected: answer,
+        correct: questions[currentQuestion].correct,
+        selectedOption: questions[currentQuestion].option[answer],
+        correctOption: questions[currentQuestion].option[questions[currentQuestion].correct]
+      });
+
+      if (answer === questions[currentQuestion].correct) {
+        score++;
+        outResult.innerHTML = "<span style='color: green;'>Correct!</span>";
+      } else {
+        outResult.innerHTML = "<span style='color: red;'>Wrong answer.</span>";
+      }
+
+      currentQuestion++;
+      display();
+    }
+
+    function showFinalResult() {
+      outQuestion.innerHTML = "Quiz completed!";
+      outOption.innerHTML = "";
+      outResult.innerHTML = `
+        <h3>Your final score is: ${score}/${questions.length}</h3>
+        <h4>Results:</h4>
+        <ul>
+          ${userAnswers.map(answer => `
+            <li>
+              <strong>Question:</strong> ${answer.question}<br>
+              <strong>Your Answer:</strong> ${answer.selectedOption || "No answer"}
+             ${answer.selected === answer.correct ? " ✔️" : " ❌"}
+            <br>
+              <strong>Correct Answer:</strong> ${answer.correctOption}
+            </li>
+          `).join('')}
+        </ul>
+      `;
+      submitBtn.style.display = "none";
+      restartBtn.style.display = "inline-block";
+    }
+
+    function restart() {
+      score = 0;
+      currentQuestion = 0;
+      userAnswers = [];
+      submitBtn.style.display = "inline-block";
+      restartBtn.style.display = "none";
+      display();
+    }
+
+    // Initial display
+    display();
+  </script>
+</body>
+</html>
